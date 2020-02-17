@@ -23,6 +23,9 @@
 #include <EventHandler.hpp>
 #include <SipRtpEndpointImpl.hpp>
 #include <sigc++/connection.h>
+#include <gst/sdp/gstsdpmessage.h>
+
+
 
 
 namespace kurento
@@ -31,6 +34,9 @@ namespace kurento
 class MediaPipeline;
 
 class FacadeRtpEndpointImpl;
+
+class SDES;
+class CryptoSuite;
 
 void Serialize (std::shared_ptr<FacadeRtpEndpointImpl> &object,
                 JsonSerializer &serializer);
@@ -42,7 +48,9 @@ public:
 
   FacadeRtpEndpointImpl (const boost::property_tree::ptree &conf,
                    std::shared_ptr<MediaPipeline> mediaPipeline,
-                   std::shared_ptr<SDES> crypto, bool useIpv6);
+                   std::shared_ptr<SDES> crypto,
+				   bool cryptoAgnostic,
+				   bool useIpv6);
 
   virtual ~FacadeRtpEndpointImpl ();
 
@@ -107,7 +115,7 @@ public:
   void setAudioFormat (std::shared_ptr<AudioCaps> caps) override;
   void setVideoFormat (std::shared_ptr<VideoCaps> caps) override;
 
-  /*virtual void release () override; */
+  virtual void release () override;
 
   virtual std::string getGstreamerDot () override;
   virtual std::string getGstreamerDot (std::shared_ptr<GstreamerDotDetails>
@@ -156,6 +164,8 @@ protected:
 
 private:
 
+  bool cryptoAgnostic;
+
   sigc::signal<void, MediaStateChanged> signalMediaStateChanged;
   sigc::signal<void, ConnectionStateChanged> signalConnectionStateChanged;
   sigc::signal<void, MediaSessionStarted> signalMediaSessionStarted;
@@ -167,6 +177,30 @@ private:
   sigc::connection connMediaSessionStarted;
   sigc::connection connMediaSessionTerminated;
   sigc::connection connOnKeySoftLimit;
+
+  bool
+  isCryptoAgnostic ();
+
+  bool
+  generateCryptoAgnosticOffer (std::string& offer);
+
+  bool
+  checkCryptoOffer (std::string& offer, std::shared_ptr<SDES>& crypto);
+
+  bool
+  checkCryptoAnswer (std::string& answer, std::shared_ptr<SDES>& crypto);
+
+  void
+  replaceSsrc (GstSDPMedia *media, guint idx, gchar *newSsrcStr);
+
+  void
+  replaceAllSsrcAttrs (GstSDPMedia *media, std::list<guint> sscrIdxs);
+
+  void
+  removeCryptoAttrs (GstSDPMedia *media, std::list<guint> cryptoIdx);
+
+  void
+  addAgnosticMedia (GstSDPMedia *media, GstSDPMessage *sdpOffer);
 
   void
   disconnectForwardSignals ();

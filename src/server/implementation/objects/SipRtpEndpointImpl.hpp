@@ -41,7 +41,8 @@ public:
 
 	SipRtpEndpointImpl (const boost::property_tree::ptree &conf,
                    std::shared_ptr<MediaPipeline> mediaPipeline,
-                   std::shared_ptr<SDES> crypto, bool useIpv6);
+                   std::shared_ptr<SDES> crypto,
+				   bool useIpv6);
 
   virtual ~SipRtpEndpointImpl ();
 
@@ -51,6 +52,8 @@ public:
           std::shared_ptr<MediaPipeline> mediaPipeline,
           std::shared_ptr<SDES> crypto, bool useIpv6,
 		  const std::string &sdp);
+
+  bool isEncrypted ();
 
   /* Next methods are automatically implemented by code generator */
   using BaseRtpEndpointImpl::connect;
