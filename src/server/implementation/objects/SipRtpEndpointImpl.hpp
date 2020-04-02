@@ -53,6 +53,10 @@ public:
           std::shared_ptr<SDES> crypto, bool useIpv6,
 		  const std::string &sdp);
 
+
+  void setAudioSsrc (guint32 ssrc);
+  void setVideoSsrc (guint32 ssrc);
+
   /* Next methods are automatically implemented by code generator */
   using BaseRtpEndpointImpl::connect;
   virtual bool connect (const std::string &eventType,
