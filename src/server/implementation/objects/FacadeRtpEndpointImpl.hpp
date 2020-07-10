@@ -186,6 +186,15 @@ private:
   guint32 agnosticNonCryptoVideoSsrc;
 
   bool
+  sameConnection (GstSDPMessage *sdp1, GstSDPMessage *sdp2);
+
+  bool
+  findCompatibleMedia (GstSDPMedia* media, GstSDPMessage *oldAnswer);
+
+  void
+  answerHasCompatibleMedia (const std::string& answer, bool& audio_compatible, bool& video_compatible);
+
+  bool
   isCryptoAgnostic ();
 
   bool
