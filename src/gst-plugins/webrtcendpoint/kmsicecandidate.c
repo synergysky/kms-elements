@@ -129,7 +129,7 @@ kms_ice_candidate_update_values (KmsIceCandidate * self)
   } else if (g_strcmp0 (tmp, "2") == 0) {
     self->priv->component = KMS_ICE_COMPONENT_RTCP;
   } else {
-    GST_ERROR_OBJECT (self, "Unsupported ice candidate component %s", tmp);
+    GST_ERROR_OBJECT (self, "Unsupported ICE candidate component %s", tmp);
     goto end;
   }
   g_free (tmp);
@@ -155,7 +155,7 @@ kms_ice_candidate_update_values (KmsIceCandidate * self)
   } else if (g_strcmp0 (tmp, "relay") == 0) {
     self->priv->type = KMS_ICE_CANDIDATE_TYPE_RELAY;
   } else {
-    GST_ERROR_OBJECT (self, "Unsupported ice candidate type %s", tmp);
+    GST_ERROR_OBJECT (self, "Unsupported ICE candidate type %s", tmp);
     goto end;
   }
   g_free (tmp);
@@ -193,30 +193,28 @@ kms_ice_candidate_update_values (KmsIceCandidate * self)
     // The IP is actually an mDNS address, try to resolve it.
     // https://datatracker.ietf.org/doc/draft-ietf-rtcweb-mdns-ice-candidates/
 
-    GResolver *resolver = g_resolver_get_default ();
     GError *err = NULL;
+    GResolver *resolver = g_resolver_get_default ();
     GList *addresses = g_resolver_lookup_by_name (resolver, self->priv->ip,
         NULL, &err);
+    g_object_unref (resolver);
 
     if (err) {
       GST_DEBUG_OBJECT (self, "Ignore foreign mDNS candidate: %s",
-          (err->message ? err->message : "(None)"));
-      g_error_free (err);
-      err = NULL;
-    } else {
-      // Set the resolved address
-      GInetAddress *address = (GInetAddress *) g_list_nth_data (addresses, 0);
-      gchar *resolved_ip = g_inet_address_to_string (address);
-      GST_INFO_OBJECT (self, "mDNS address (%s) resolved: %s", self->priv->ip,
-          resolved_ip);
-      kms_ice_candidate_set_address (self, resolved_ip);
-      g_free (resolved_ip);
+          GST_STR_NULL (err->message));
+      g_clear_error (&err);
+      goto end;
     }
 
-    if (addresses) {
-      g_resolver_free_addresses (addresses);
-    }
-    g_object_unref (resolver);
+    // Set the resolved address
+    GInetAddress *address = (GInetAddress *) g_list_nth_data (addresses, 0);
+    gchar *resolved_ip = g_inet_address_to_string (address);
+    GST_INFO_OBJECT (self, "mDNS address (%s) resolved: %s", self->priv->ip,
+        resolved_ip);
+    kms_ice_candidate_set_address (self, resolved_ip);
+    g_free (resolved_ip);
+
+    g_resolver_free_addresses (addresses);
   }
 
   ret = TRUE;

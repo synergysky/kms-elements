@@ -1,4 +1,5 @@
-# Disable error when functions are unused
+# Disable error when functions are unused. This allows commenting out calls to
+# `tcase_add_test()` to skip running certain tests during a debug session.
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error=unused-function")
 
 set(KMS_TEST_UTILS_SOURCES
@@ -23,8 +24,13 @@ set_property(TARGET kmstestutils
 )
 
 include(TestHelpers)
+
+set(GST_DEBUG_DUMP_DOT_DIR "${CMAKE_BINARY_DIR}/debug/dots" CACHE PATH "Sets the directory where dot files will be dumped")
+file(MAKE_DIRECTORY "${GST_DEBUG_DUMP_DOT_DIR}")
+
 set(TEST_VARIABLES
-  "GST_PLUGIN_PATH=$ENV{GST_PLUGIN_PATH}:${CMAKE_BINARY_DIR}"
+  "GST_DEBUG_DUMP_DOT_DIR=${GST_DEBUG_DUMP_DOT_DIR}"
+  "GST_PLUGIN_PATH=${CMAKE_BINARY_DIR}:$ENV{GST_PLUGIN_PATH}"
   "CK_DEFAULT_TIMEOUT=50"
 )
 set(VALGRIND_TEST_VARIABLES
