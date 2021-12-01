@@ -5,7 +5,6 @@ Build-Depends: debhelper (>= 9),
  build-essential,
  cmake,
  ffmpeg | libav-tools,
- gstreamer1.0-nice,
  gstreamer1.0-plugins-bad,
  gstreamer1.0-plugins-good,
  gstreamer1.0-x,
@@ -32,7 +31,6 @@ Package: kms-elements
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends},
- gstreamer1.0-nice,
  kms-core (>= 7.0.0),
  openwebrtc-gst-plugins
 Description: Kurento Elements module
